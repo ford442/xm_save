@@ -600,6 +600,6 @@ export async function saveToFile(module: XMModule, filename: string): Promise<vo
   const buffer = writer.write(module);
   
   // Dynamic import for Node.js fs module
-  const fs = await import('fs').then(m => m.promises);
+  const { promises: fs } = await import('fs');
   await fs.writeFile(filename, Buffer.from(buffer));
 }
