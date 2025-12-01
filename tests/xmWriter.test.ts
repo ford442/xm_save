@@ -50,7 +50,7 @@ describe('XMWriter', () => {
       // All notes should be empty
       expect(pattern.data[0][0].note).toBe(0);
       expect(pattern.data[0][0].instrument).toBe(0);
-      expect(pattern.data[0][0].volume).toBe(0);
+      expect(pattern.data[0][0].volume).toBeUndefined();
     });
 
     it('should create pattern with custom size', () => {

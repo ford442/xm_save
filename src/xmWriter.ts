@@ -31,6 +31,17 @@ export class XMWriter {
    * @returns ArrayBuffer containing the XM file data
    */
   write(module: XMModule): ArrayBuffer {
+    // Validate limits
+    if (module.header.numberOfChannels > 32) {
+      throw new Error('Number of channels cannot exceed 32');
+    }
+    if (module.header.numberOfInstruments > 128) {
+      throw new Error('Number of instruments cannot exceed 128');
+    }
+    if (module.header.numberOfPatterns > 256) {
+      throw new Error('Number of patterns cannot exceed 256');
+    }
+
     this.writer = new BinaryWriter();
 
     this.writeHeader(module.header);
@@ -99,10 +110,25 @@ export class XMWriter {
    * @returns Packed bytes for this note
    */
   private packNote(note: XMPatternNote): Uint8Array {
+    // Mutual exclusion check for volume
+    if (note.volume !== undefined && note.volumeEffect !== undefined) {
+      throw new Error('Cannot set both volume and volumeEffect on the same note');
+    }
+
+    let volumeByte = 0;
+    if (note.volumeEffect !== undefined) {
+      volumeByte = note.volumeEffect;
+    } else if (note.volume !== undefined) {
+      // Map 0-64 to 0x10-0x50
+      // 0x10 = Volume 0 (Silence)
+      // 0x50 = Volume 64 (Max)
+      volumeByte = note.volume + 0x10;
+    }
+
     // Check if all fields are empty
     const hasNote = note.note !== 0;
     const hasInstrument = note.instrument !== 0;
-    const hasVolume = note.volume !== 0;
+    const hasVolume = volumeByte !== 0;
     const hasEffect = note.effectType !== 0 || note.effectParam !== 0;
 
     // If all fields are present, write them all without packing
@@ -110,7 +136,7 @@ export class XMWriter {
       return new Uint8Array([
         note.note,
         note.instrument,
-        note.volume,
+        volumeByte,
         note.effectType,
         note.effectParam,
       ]);
@@ -130,7 +156,7 @@ export class XMWriter {
     }
     if (hasVolume) {
       flags |= 0x04;
-      bytes.push(note.volume);
+      bytes.push(volumeByte);
     }
     if (note.effectType !== 0) {
       flags |= 0x08;
@@ -436,7 +462,7 @@ export function createPattern(numberOfRows: number = 64, numberOfChannels: numbe
       rowData.push({
         note: 0,
         instrument: 0,
-        volume: 0,
+        // volume is undefined by default
         effectType: 0,
         effectParam: 0,
       });

@@ -41,8 +41,16 @@ export interface XMPatternNote {
   note: number;
   /** Instrument number (0 = no instrument change) */
   instrument: number;
-  /** Volume column (0 = no volume change, 0x10-0x50 = set volume) */
-  volume: number;
+  /**
+   * [OPTIONAL] Set volume command (0-64, maps to XM bytes 0x10-0x50).
+   * undefined means "No Change" (0x00 in XM).
+   */
+  volume?: number;
+  /**
+   * [OPTIONAL] Raw volume column effect command (0x60-0xFF).
+   * Cannot be used if 'volume' is set.
+   */
+  volumeEffect?: number;
   /** Effect type (0-35) */
   effectType: number;
   /** Effect parameter */
@@ -257,4 +265,32 @@ export enum EnvelopeFlags {
   On = 0x01,
   Sustain = 0x02,
   Loop = 0x04,
+}
+
+/**
+ * Main XM Effects (E-Type, Effect Type 0-35)
+ */
+export enum XMEffects {
+  Arpeggio = 0x0, // 0-9
+  PortamentoUp = 0x1,
+  PortamentoDown = 0x2,
+  TonePortamento = 0x3,
+  Vibrato = 0x4,
+  TonePortaVolumeSlide = 0x5,
+  VibratoVolumeSlide = 0x6,
+  Tremolo = 0x7,
+  SetPanning = 0x8,
+  SetSampleOffset = 0x9, // Parameter in 256-byte units
+  VolumeSlide = 0xA,
+  PositionJump = 0xB,
+  SetVolume = 0xC, // Sets the main volume column value
+  PatternBreak = 0xD,
+  ExtendedEffect = 0xE, // E-type effects (E0-EF)
+  SetGlobalVolume = 0xF,
+  // Effect type 10+
+  SetTempoBPM = 0x11, // G
+  FineVibrato = 0x12, // H
+  SetGlobalVolumeSlide = 0x14, // K
+  SetEnvelopePosition = 0x15, // L
+  MultiRetriggerNote = 0x1D, // T
 }
