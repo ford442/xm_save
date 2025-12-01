@@ -52,6 +52,7 @@ export {
   XM_CONSTANTS,
   LoopType,
   EnvelopeFlags,
+  XMEffects,
 } from './types';
 
 // Export writer and helper functions
