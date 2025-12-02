@@ -209,7 +209,7 @@ export class XMWriter {
         const note = pattern.data[row]?.[channel] || {
           note: 0,
           instrument: 0,
-          volume: 0,
+          // volume and volumeEffect are intentionally omitted here to default to undefined ("No Change").
           effectType: 0,
           effectParam: 0,
         };
